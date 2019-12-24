@@ -1,3 +1,5 @@
+#!/bin/sh
+
 # Copyright 2019 The Codelogia Authors
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,26 +14,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-package(default_visibility = ["//visibility:private"])
+set -o errexit
 
-load("//:defs.bzl", "gomplate_binary")
-load("//tests/gomplate_binary:defs.bzl", "binary_test")
-
-sh_binary(
-    name = "print_message",
-    srcs = ["print_message.sh"],
-)
-
-gomplate_binary(
-    name = "runtime_tools",
-    runtime_tools = [
-        ":print_message",
-    ],
-    template = ":runtime_tools.tmpl.sh",
-)
-
-binary_test(
-    name = "runtime_tools_test",
-    expected_output = "A message from a runtime tool!\n",
-    target = ":runtime_tools",
-)
+cat '{{ index (ds "_data") "message.txt" }}'

@@ -18,15 +18,15 @@ load("//:defs.bzl", "gomplate_binary")
 load("//tests/gomplate_binary:defs.bzl", "binary_test")
 
 gomplate_binary(
-    name = "runtime_files",
-    runtime_files = [
+    name = "data",
+    data = [
         ":message.txt",
     ],
-    template = ":runtime_files.tmpl.sh",
+    template = ":data.tmpl.sh",
 )
 
 binary_test(
-    name = "runtime_files_test",
+    name = "data_test",
     expected_output = "A message from a runtime file!\n",
-    target = ":runtime_files",
+    target = ":data",
 )

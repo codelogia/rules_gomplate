@@ -36,27 +36,27 @@ def _gomplate_binary_impl(ctx):
             ),
         )
 
-    runtime_files = []
-    _files_dict = {}
-    for runtime_file in ctx.attr.runtime_files:
-        for file in runtime_file[DefaultInfo].files.to_list():
-            runtime_files.append(file)
+    data = []
+    _data_dict = {}
+    for file in ctx.attr.data:
+        for file in file[DefaultInfo].files.to_list():
+            data.append(file)
             basename = file.short_path.rpartition("/")[-1]
-            _files_dict[basename] = file.short_path
+            _data_dict[basename] = file.short_path
 
-    _files = ctx.actions.declare_file("_files_{target_name}.json".format(target_name = ctx.attr.name))
-    ctx.actions.write(_files, struct(**_files_dict).to_json())
+    _data = ctx.actions.declare_file("_data_{target_name}.json".format(target_name = ctx.attr.name))
+    ctx.actions.write(_data, struct(**_data_dict).to_json())
     arguments.add(
         "--datasource",
-        "_files={files}".format(files = _files.path),
+        "_data={data}".format(data = _data.path),
     )
 
-    runtime_tools = []
-    runtime_tools_runfiles = []
+    tools = []
+    tools_runfiles = []
     _tools_dict = {}
-    for tool in ctx.attr.runtime_tools:
+    for tool in ctx.attr.tools:
         default_info = tool[DefaultInfo]
-        runtime_tools_runfiles.append(default_info.default_runfiles)
+        tools_runfiles.append(default_info.default_runfiles)
         executable = default_info.files_to_run.executable
         executable_basename = executable.short_path.rpartition("/")[-1]
         _tools_dict[executable_basename] = executable.short_path
@@ -73,14 +73,14 @@ def _gomplate_binary_impl(ctx):
         arguments = [arguments],
         inputs = [
             ctx.file.template,
-            _files,
+            _data,
             _tools,
         ] + ctx.files.datasources,
         outputs = [output],
     )
 
-    runfiles = ctx.runfiles(files = runtime_files)
-    for rf in runtime_tools_runfiles:
+    runfiles = ctx.runfiles(files = data)
+    for rf in tools_runfiles:
         runfiles = runfiles.merge(rf)
 
     return [DefaultInfo(
@@ -91,21 +91,21 @@ def _gomplate_binary_impl(ctx):
 gomplate_binary = rule(
     implementation = _gomplate_binary_impl,
     attrs = {
-        "datasources": attr.label_keyed_string_dict(
-            allow_files = True,
-            doc = "A set of 'file: name' datasources to be passed to gomplate",
-        ),
-        "runtime_files": attr.label_list(
+        "data": attr.label_list(
             allow_files = True,
             doc = "A list of files to be used at runtime",
         ),
-        "runtime_tools": attr.label_list(
-            doc = "A list of executable tools to be used at runtime",
+        "datasources": attr.label_keyed_string_dict(
+            allow_files = True,
+            doc = "A set of 'file: name' datasources to be passed to gomplate",
         ),
         "template": attr.label(
             allow_single_file = True,
             doc = "The template to be rendered using gomplate",
             mandatory = True,
+        ),
+        "tools": attr.label_list(
+            doc = "A list of executable tools to be used at runtime",
         ),
         "_gomplate": attr.label(
             allow_single_file = True,
