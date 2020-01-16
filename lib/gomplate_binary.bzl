@@ -68,6 +68,11 @@ def _gomplate_binary_impl(ctx):
         "_tools={tools}".format(tools = _tools.path),
     )
 
+    if ctx.attr.left_delim != "":
+        arguments.add("--left-delim", ctx.attr.left_delim)
+    if ctx.attr.right_delim != "":
+        arguments.add("--right-delim", ctx.attr.right_delim)
+
     ctx.actions.run(
         executable = ctx.executable._gomplate,
         arguments = [arguments],
@@ -98,6 +103,14 @@ gomplate_binary = rule(
         "datasources": attr.label_keyed_string_dict(
             allow_files = True,
             doc = "A set of 'file: name' datasources to be passed to gomplate",
+        ),
+        "left_delim": attr.string(
+            default = "",
+            doc = "The left delimiter to be used with gomplate",
+        ),
+        "right_delim": attr.string(
+            default = "",
+            doc = "The right delimiter to be used with gomplate",
         ),
         "template": attr.label(
             allow_single_file = True,

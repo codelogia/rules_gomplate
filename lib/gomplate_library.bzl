@@ -30,6 +30,11 @@ def _gomplate_library_impl(ctx):
         arguments.add("--file", template_file)
         arguments.add("--out", output)
 
+        if ctx.attr.left_delim != "":
+            arguments.add("--left-delim", ctx.attr.left_delim)
+        if ctx.attr.right_delim != "":
+            arguments.add("--right-delim", ctx.attr.right_delim)
+
         for datasource, datasource_name in ctx.attr.datasources.items():
             datasource_files = datasource[DefaultInfo].files.to_list()
             if len(datasource_files) > 1:
@@ -60,6 +65,14 @@ gomplate_library = rule(
         "datasources": attr.label_keyed_string_dict(
             allow_files = True,
             doc = "A set of 'file: name' datasources to be passed to gomplate",
+        ),
+        "left_delim": attr.string(
+            default = "",
+            doc = "The left delimiter to be used with gomplate",
+        ),
+        "right_delim": attr.string(
+            default = "",
+            doc = "The right delimiter to be used with gomplate",
         ),
         "templates": attr.label_keyed_string_dict(
             allow_files = True,
