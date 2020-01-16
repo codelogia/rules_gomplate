@@ -17,5 +17,7 @@ This module exports the gomplate rules.
 """
 
 load("//lib:gomplate_binary.bzl", _gomplate_binary = "gomplate_binary")
+load("//lib:gomplate_library.bzl", _gomplate_library = "gomplate_library")
 
 gomplate_binary = _gomplate_binary
+gomplate_library = _gomplate_library
